@@ -38,8 +38,8 @@ local function makelist(aline,bline)
 	end
 end
 
-vim.api.nvim_exec("command! -range Toggle lua require'nvim-checklist-plugin'.toggle(<line1>,<line2>)", true);
-vim.api.nvim_exec("command! -range Makelist lua require'nvim-checklist-plugin'.makelist(<line1>,<line2>)", true);
+vim.api.nvim_create_user_command("ChecklistToggle","lua require('checklist').toggle(<line1>,<line2>)",{})
+vim.api.nvim_create_user_command("ChecklistMakeList","lua require('checklist').makelist(<line1>,<line2>)",{})
 
 return {
 	toggle = toggle,
