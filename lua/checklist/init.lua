@@ -1,10 +1,27 @@
+local default_unchecked_label = " ☐ "
+local default_checked_label = " ☑ "
+
+local unchecked_label = default_unchecked_label
+local checked_label = default_checked_label
+
+local function reset_default_labels()
+    unchecked_label = default_unchecked_label
+    checked_label = default_checked_label
+end
+
+local function set_labels(unchecked_str, checked_str)
+    -- make sure labels are distinct, non-empty, and not a prefix of the other
+    if string.sub(unchecked_str,1,string.len(checked_str)) ~= string.sub(checked_str,1,string.len(unchecked_str)) then
+        unchecked_label = unchecked_str
+        checked_label = checked_str
+    end
+end
+
 local function toggle_line(line)
-	if string.len(line) <= 6 then
-		return line
-	elseif string.sub(line,1,5) == " ☐ " then
-		return " ☑ " .. string.sub(line,6)
-	elseif string.sub(line,1,5) == " ☑ " then
-		return " ☐ " .. string.sub(line,6)
+	if string.sub(line, 1, string.len(unchecked_label)) == unchecked_label then
+		return checked_label .. string.sub(line, string.len(unchecked_label) + 1)
+	elseif string.sub(line, 1, string.len(checked_label)) == checked_label then
+		return unchecked_label .. string.sub(line, string.len(checked_label) + 1)
 	else
 		return line
 	end
@@ -26,12 +43,12 @@ end
 local function makelist(aline,bline)
 	if aline == bline then
 		local line = vim.api.nvim_get_current_line()
-		vim.api.nvim_set_current_line(' ☐ ' .. line);
+		vim.api.nvim_set_current_line(unchecked_label .. line);
 	else
 		local lines = vim.api.nvim_buf_get_lines(0,aline-1,bline,1)
 		for i,line in pairs(lines) do
 			if string.len(line) ~= 0 then
-				lines[i] = ' ☐ ' .. line
+				lines[i] = unchecked_label .. line
 			end
 		end
 		vim.api.nvim_buf_set_lines(0,aline-1,bline,1,lines);
@@ -43,5 +60,7 @@ vim.api.nvim_create_user_command("ChecklistMakeList","lua require('checklist').m
 
 return {
 	toggle = toggle,
-	makelist = makelist
+	makelist = makelist,
+    set_labels = set_labels,
+    reset_default_labels = reset_default_labels,
 }
